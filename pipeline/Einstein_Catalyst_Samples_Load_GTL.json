@@ -63,7 +63,7 @@
 											"value": "@item().adls_landing_file_path",
 											"type": "Expression"
 										},
-										"file_patch": "*.csv"
+										"file_path": "*.csv"
 									}
 								}
 							],
