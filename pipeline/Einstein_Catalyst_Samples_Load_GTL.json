@@ -7,7 +7,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "CatalystTubeLookup",
+						"activity": "DMKE_Lookup",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('CatalystTubeLookup').output.value",
+						"value": "@activity('DMKE_Lookup').output.value",
 						"type": "Expression"
 					},
 					"isSequential": false,
@@ -548,7 +548,7 @@
 										},
 										{
 											"source": {
-												"name": "CT_Number",
+												"name": "CT_number",
 												"type": "String"
 											},
 											"sink": {
@@ -704,29 +704,9 @@
 				}
 			},
 			{
-				"name": "SetVariable1",
-				"type": "SetVariable",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "Revision_Date",
-					"value": {
-						"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH:mm:ss')",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "CatalystTubeLookup",
+				"name": "DMKE_Lookup",
 				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "SetVariable1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
