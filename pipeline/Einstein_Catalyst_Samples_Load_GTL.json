@@ -552,7 +552,7 @@
 												"type": "String"
 											},
 											"sink": {
-												"name": "ct_number",
+												"name": "CT_number",
 												"type": "String"
 											}
 										}
