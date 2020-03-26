@@ -96,7 +96,7 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderQuery": "SELECT STUFF((SELECT ',' +  'CT-'+convert (nvarchar(10),ct_number)\n            FROM stg.Src_CatalystSample \n\t\t\t--where catalyst_id like '%ct%'\n            FOR XML PATH('')) ,1,1,''\n\t\t\t) AS ctnumber,NULL as cbnumber"
+									"sqlReaderQuery": "SELECT STUFF((SELECT distinct ',' +  'CT-'+convert (nvarchar(10),ct_number)\n            FROM [stg].[Src_DMKE_CT_CatalystSample]\n\t\t\t--where catalyst_id like '%ct%'\n            FOR XML PATH('')) ,1,1,''\n\t\t\t) AS ctnumber,NULL as cbnumber"
 								},
 								"dataset": {
 									"referenceName": "ds_asql_dest",
