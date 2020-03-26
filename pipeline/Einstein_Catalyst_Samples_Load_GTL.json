@@ -48,7 +48,7 @@
 								},
 								"sink": {
 									"type": "AzureSqlSink",
-									"preCopyScript": "truncate table [stg].[Src_CatalystSample]",
+									"preCopyScript": "truncate table  [stg].[Src_DMKE_CT_CatalystSample]",
 									"disableMetricsCollection": false
 								},
 								"enableStaging": false,
