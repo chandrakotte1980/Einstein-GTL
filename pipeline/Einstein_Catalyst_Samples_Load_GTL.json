@@ -750,11 +750,11 @@
 							},
 							"file_shortname": {
 								"type": "String",
-								"value": "Run Request"
+								"value": "ExpInfo"
 							},
 							"file_sub_short_name": {
 								"type": "String",
-								"value": "Catalyst and Tube"
+								"value": "ExpInfo"
 							},
 							"filesource": {
 								"type": "String",
