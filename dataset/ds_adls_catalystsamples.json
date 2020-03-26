@@ -9,7 +9,7 @@
 			"folder_path": {
 				"type": "string"
 			},
-			"file_patch": {
+			"file_path": {
 				"type": "string"
 			}
 		},
