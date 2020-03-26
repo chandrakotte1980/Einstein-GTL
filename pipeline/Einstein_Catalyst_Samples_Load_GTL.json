@@ -48,7 +48,7 @@
 								},
 								"sink": {
 									"type": "AzureSqlSink",
-									"preCopyScript": "truncate table [stg].[Src_CatalystSample]",
+									"preCopyScript": "truncate table  [stg].[Src_DMKE_CT_CatalystSample]",
 									"disableMetricsCollection": false
 								},
 								"enableStaging": false,
@@ -153,7 +153,7 @@
 											},
 											"sink": {
 												"name": "Reactor_Diameter_cm",
-												"type": "Double"
+												"type": "String"
 											}
 										},
 										{
@@ -223,7 +223,7 @@
 											},
 											"sink": {
 												"name": "Total_Bed_Height_cm",
-												"type": "Double"
+												"type": "String"
 											}
 										},
 										{
@@ -552,8 +552,8 @@
 												"type": "String"
 											},
 											"sink": {
-												"name": "CT_Number",
-												"type": "Int32"
+												"name": "ct_number",
+												"type": "String"
 											}
 										}
 									]
