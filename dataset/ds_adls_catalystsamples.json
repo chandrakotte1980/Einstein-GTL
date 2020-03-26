@@ -14,7 +14,7 @@
 			}
 		},
 		"folder": {
-			"name": "GTL"
+			"name": "CIF_GTL"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
