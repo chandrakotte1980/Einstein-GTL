@@ -1,0 +1,23 @@
+{
+	"name": "Ds_Fs_STCA_File",
+	"properties": {
+		"parameters": {
+			"folder_path": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "DS_STCH"
+		},
+		"annotations": [],
+		"type": "FileShare",
+		"typeProperties": {
+			"fileName": "",
+			"folderPath": {
+				"value": "@dataset().folder_path",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

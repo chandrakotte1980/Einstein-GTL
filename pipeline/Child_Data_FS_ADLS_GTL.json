@@ -17,11 +17,11 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderStoredProcedureName": "[dbo].[usp_get_file_path]",
+						"sqlReaderStoredProcedureName": "[dbo].[usp_get_filename]",
 						"storedProcedureParameters": {
-							"country_code": {
+							"file_name": {
 								"type": "String",
-								"value": "Houston"
+								"value": "0094"
 							},
 							"file_process_status": {
 								"type": "String",
@@ -29,21 +29,21 @@
 							},
 							"file_shortname": {
 								"type": "String",
-								"value": "Run Request"
-							},
-							"filesource": {
-								"type": "String",
-								"value": "STCH"
+								"value": "ExpInfo"
 							},
 							"file_sub_short_name": {
 								"type": "String",
-								"value": "Catalyst and Tube"
+								"value": "ExpInfo"
 							},
-							"file_name": {
+							"filesource": {
 								"type": "String",
-								"value": "A3040"
+								"value": "STCA"
 							}
 						}
+					},
+					"dataset": {
+						"referenceName": "Ds_Asql_GetSource",
+						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
 				}
@@ -80,12 +80,35 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"source": {
-									"type": "FileSystemSource",
-									"recursive": false
+								"sink": {
+									"type": "AzureDataLakeStoreSink"
 								},
 								"enableStaging": false
-							}
+							},
+							"inputs": [
+								{
+									"referenceName": "Ds_Fs_STCA_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"folder_path": {
+											"value": "@item().file_path",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Ds_Adls_Stca_GTL_Lab",
+									"type": "DatasetReference",
+									"parameters": {
+										"folder_path": {
+											"value": "@item().adls_landing_file_path",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						}
 					]
 				}
@@ -112,11 +135,11 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderStoredProcedureName": "[dbo].[usp_get_file_path]",
+						"sqlReaderStoredProcedureName": "[dbo].[usp_get_filename]",
 						"storedProcedureParameters": {
-							"country_code": {
+							"file_name": {
 								"type": "String",
-								"value": "Houston"
+								"value": "0094"
 							},
 							"file_process_status": {
 								"type": "String",
@@ -124,21 +147,21 @@
 							},
 							"file_shortname": {
 								"type": "String",
-								"value": "Run Request"
-							},
-							"filesource": {
-								"type": "String",
-								"value": "STCH"
+								"value": "MuSyCon"
 							},
 							"file_sub_short_name": {
 								"type": "String",
-								"value": "Feed-Target Condition"
+								"value": "MuSyCon"
 							},
-							"file_name": {
+							"filesource": {
 								"type": "String",
-								"value": "A3040"
+								"value": "STCA"
 							}
 						}
+					},
+					"dataset": {
+						"referenceName": "Ds_Asql_GetSource",
+						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
 				}
@@ -175,12 +198,35 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"source": {
-									"type": "FileSystemSource",
-									"recursive": true
+								"sink": {
+									"type": "AzureDataLakeStoreSink"
 								},
 								"enableStaging": false
-							}
+							},
+							"inputs": [
+								{
+									"referenceName": "Ds_Fs_STCA_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"folder_path": {
+											"value": "@item().file_path",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Ds_Adls_Stca_GTL_Lab",
+									"type": "DatasetReference",
+									"parameters": {
+										"folder_path": {
+											"value": "@item().adls_landing_file_path",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						}
 					]
 				}
