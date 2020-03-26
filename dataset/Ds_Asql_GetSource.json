@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "DS_STCH"
+			"name": "DEV_GTL"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
