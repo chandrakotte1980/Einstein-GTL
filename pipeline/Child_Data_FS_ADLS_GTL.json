@@ -80,6 +80,10 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"source": {
+									"type": "FileSystemSource",
+									"recursive": true
+								},
 								"sink": {
 									"type": "AzureDataLakeStoreSink"
 								},
