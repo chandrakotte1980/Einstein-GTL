@@ -1,0 +1,84 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "shell-02-eun-adf-rpsaboylfaionnkcjcv"
+		},
+		"LNK_FS_LAB_STCA_password": {
+			"value": ""
+		},
+		"LS_ASQL_GTL_connectionString": {
+			"value": ""
+		},
+		"LS_AWS_DMKE_SQLDB_connectionString": {
+			"value": ""
+		},
+		"LS_AWS_DMKE_SQLDB_password": {
+			"value": ""
+		},
+		"LS_DBS_GTL_accessToken": {
+			"value": ""
+		},
+		"LS_ORC_SM_EUROPE_connectionString": {
+			"value": ""
+		},
+		"Ds_Adls_Stca_GTL_Lab_properties_typeProperties_fileName": {
+			"value": ""
+		},
+		"Ds_Adls_Stca_GTL_Lab_properties_typeProperties_folderPath": {
+			"value": "@dataset().folder_path"
+		},
+		"Ds_Fs_Metadata_STCA_GTL_properties_typeProperties_fileName": {
+			"value": ""
+		},
+		"Ds_Fs_Metadata_STCA_GTL_properties_typeProperties_folderPath": {
+			"value": "@dataset().folderpath"
+		},
+		"Ds_Fs_STCA_File_properties_typeProperties_fileName": {
+			"value": ""
+		},
+		"Ds_Fs_STCA_File_properties_typeProperties_folderPath": {
+			"value": "@dataset().folder_path"
+		},
+		"Default Key Vault Service_properties_typeProperties_baseUrl": {
+			"value": "https://shell-02-eun-kv-keqraube.vault.azure.net/"
+		},
+		"LNK_FS_LAB_STCA_properties_typeProperties_host": {
+			"value": "\\\\dmke-amslab.shell.com\\EinsteinGTL_Test\\"
+		},
+		"LNK_FS_LAB_STCA_properties_typeProperties_userId": {
+			"value": "EUROPE\\App-EinsteinGL-Dev-S"
+		},
+		"LS_ADLS_GTL_properties_typeProperties_dataLakeStoreUri": {
+			"value": "https://shell01eunadls1lsxooibpa.azuredatalakestore.net/webhdfs/v1"
+		},
+		"LS_ADLS_GTL_properties_typeProperties_tenant": {
+			"value": "db1e96a8-a3da-442a-930b-235cac24cd5c"
+		},
+		"LS_ADLS_GTL_properties_typeProperties_subscriptionId": {
+			"value": "c977c615-a62f-4ad4-8782-247e7f1d3f77"
+		},
+		"LS_ADLS_GTL_properties_typeProperties_resourceGroupName": {
+			"value": "shell-01-rg-toviqawlscqlajjltddr"
+		},
+		"LS_AWS_DMKE_SQLDB_properties_typeProperties_userName": {
+			"value": "Extranet-EU\\APP-Einstein-DEV-S"
+		},
+		"LS_FS_STCA_properties_typeProperties_host": {
+			"value": "\\\\dmke-amslab.shell.com\\"
+		},
+		"LS_FS_STCA_properties_typeProperties_userId": {
+			"value": "EUROPE\\App-EinsteinGL-Dev-S"
+		},
+		"StorageLinkedService_properties_typeProperties_serviceEndpoint": {
+			"value": "https://shell02eunstgxufxrzxtzss.blob.core.windows.net/"
+		},
+		"einsteinappkeyvault_properties_typeProperties_baseUrl": {
+			"value": "https://shell-02-eun-kv-keqraube.vault.azure.net/"
+		},
+		"SHIRAmsterdam_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/f039aafc-bdda-4248-a57a-1c6efe2f0fd0/resourcegroups/shell-06-rg-mnxlovtkreerwcqaqclx/providers/Microsoft.DataFactory/factories/shell-06-eu-n-adf-nnjksdnadds/integrationruntimes/SHIRAmsterdam"
+		}
+	}
+}

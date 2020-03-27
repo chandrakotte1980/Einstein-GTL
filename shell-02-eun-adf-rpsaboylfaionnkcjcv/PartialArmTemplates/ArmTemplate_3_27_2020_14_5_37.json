@@ -1,0 +1,6760 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "shell-02-eun-adf-rpsaboylfaionnkcjcv"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Child_Data_FS_ADLS_GTL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExpInfo",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[usp_get_filename]",
+								"storedProcedureParameters": {
+									"file_name": {
+										"type": "String",
+										"value": "0094"
+									},
+									"file_process_status": {
+										"type": "String",
+										"value": "Arrived"
+									},
+									"file_shortname": {
+										"type": "String",
+										"value": "ExpInfo"
+									},
+									"file_sub_short_name": {
+										"type": "String",
+										"value": "ExpInfo"
+									},
+									"filesource": {
+										"type": "String",
+										"value": "STCA"
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "Ds_Asql_GetSource",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Fs_Adls_ExpInfo",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "ExpInfo",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('ExpInfo').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Copy ExpInfo",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "FileSystemSource",
+											"recursive": true
+										},
+										"sink": {
+											"type": "AzureDataLakeStoreSink"
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "Ds_Fs_STCA_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder_path": {
+													"value": "@item().file_path",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Ds_Adls_Stca_GTL_Lab",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder_path": {
+													"value": "@item().adls_landing_file_path",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "MuSyCon",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Fs_Adls_ExpInfo",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[usp_get_filename]",
+								"storedProcedureParameters": {
+									"file_name": {
+										"type": "String",
+										"value": "0094"
+									},
+									"file_process_status": {
+										"type": "String",
+										"value": "Arrived"
+									},
+									"file_shortname": {
+										"type": "String",
+										"value": "MuSyCon"
+									},
+									"file_sub_short_name": {
+										"type": "String",
+										"value": "MuSyCon"
+									},
+									"filesource": {
+										"type": "String",
+										"value": "STCA"
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "Ds_Asql_GetSource",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Fs_Adls_MuSyCon",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "MuSyCon",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('MuSyCon').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Cpy MuSyCon",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "FileSystemSource",
+											"recursive": true
+										},
+										"sink": {
+											"type": "AzureDataLakeStoreSink"
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "Ds_Fs_STCA_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder_path": {
+													"value": "@item().file_path",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Ds_Adls_Stca_GTL_Lab",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder_path": {
+													"value": "@item().adls_landing_file_path",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"variables": {
+					"Revision_Date": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "DEV_GTL_ING"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Ds_Asql_GetSource')]",
+				"[concat(variables('factoryId'), '/datasets/Ds_Fs_STCA_File')]",
+				"[concat(variables('factoryId'), '/datasets/Ds_Adls_Stca_GTL_Lab')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Einstein_Adf_Set_Metadata_Stage')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CIF_FS_GetMetaData",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Update Task Log Started",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_sftp_getmetadata",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderpath": {
+										"value": "@pipeline().parameters.FilePath",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"childItems",
+								"itemName",
+								"itemType"
+							],
+							"storeSettings": {
+								"type": "FileServerReadSettings",
+								"recursive": true
+							}
+						}
+					},
+					{
+						"name": "Raise Error",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CIF_FS_GetMetaData",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[Sp_Einstein_Set_Object_Task_Execution_Log]",
+							"storedProcedureParameters": {
+								"Collected": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"ErrorDesc": {
+									"value": {
+										"value": "@activity('CIF_FS_GetMetaData').Error.errorCode",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"GroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"InRowcount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"IobjectID": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"LogText": {
+									"value": {
+										"value": "Task GetMetaData is having some issue while extracting File metadata information",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"LogType": {
+									"value": "3",
+									"type": "Int32"
+								},
+								"OutRcount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"RejectedCount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"RunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Severity": {
+									"value": "1",
+									"type": "Int32"
+								},
+								"Spresent": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"Success": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"TaskID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"TaskName": {
+									"value": {
+										"value": "Einsteinetadata_Stage",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Update Task Log Started",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[Sp_Einstein_Set_Object_Task_Execution_Log]",
+							"storedProcedureParameters": {
+								"Collected": {
+									"value": "1",
+									"type": "Int32"
+								},
+								"ErrorDesc": {
+									"value": {
+										"value": "No Error",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"GroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"InRowcount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"IobjectID": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"LogText": {
+									"value": {
+										"value": "Task collection between Source (STCA-LabServer) to Destination (Raw Layer)",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"LogType": {
+									"value": "1",
+									"type": "Int32"
+								},
+								"OutRcount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"RejectedCount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"RunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Severity": {
+									"value": "3",
+									"type": "Int32"
+								},
+								"Spresent": {
+									"value": "1",
+									"type": "Int32"
+								},
+								"Success": {
+									"value": "1",
+									"type": "Int32"
+								},
+								"TaskID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"TaskName": {
+									"value": {
+										"value": "Einstein_Sl_Adf_Set_Metadata_Stage",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Update Task Log Ended",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CIF_Set_Metadata_FileLog_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[SpEinstein_Set_Object_Task_Execution_Update]",
+							"storedProcedureParameters": {
+								"GroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"LogType": {
+									"value": "2",
+									"type": "Int32"
+								},
+								"RunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"TaskID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "CIF_Set_Metadata_Stage",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CIF_FS_GetMetaData",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[Sp_Einstein_SL_Insert_Filelog_Staging]",
+							"storedProcedureParameters": {
+								"filenames": {
+									"value": {
+										"value": "@string(activity('CIF_FS_GetMetadata').output.childitems)",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"last_modified_date": {
+									"value": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"ProjectID": {
+									"value": {
+										"value": "@pipeline().parameters.ProjectID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"system_id": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"ConnectorID": {
+									"value": {
+										"value": "@pipeline().parameters.ConnectorID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "CIF_Set_Metadata_FileLog",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CIF_Set_Metadata_Stage",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[Sp_Einstein_SL_Set_Stage_FileLog]",
+							"storedProcedureParameters": {
+								"PathID": {
+									"value": {
+										"value": "@pipeline().parameters.PathID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"TaskGroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"ProjectID": {
+									"value": {
+										"value": "@pipeline().parameters.ProjectID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"ConnectorID": {
+									"value": {
+										"value": "@pipeline().parameters.ConnectorID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "CIF_Set_Metadata_FileLog_copy1",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CIF_Set_Metadata_FileLog",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[Sp_Einstein_SL_Set_Stage_FileLog]",
+							"storedProcedureParameters": {
+								"PathID": {
+									"value": {
+										"value": "@pipeline().parameters.PathID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"TaskGroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"ProjectID": {
+									"value": {
+										"value": "@pipeline().parameters.ProjectID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"ConnectorID": {
+									"value": {
+										"value": "@pipeline().parameters.ConnectorID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"FilePath": {
+						"type": "string"
+					},
+					"SystemID": {
+						"type": "int"
+					},
+					"PathID": {
+						"type": "int"
+					},
+					"TaskGroupID": {
+						"type": "int"
+					},
+					"ProjectID": {
+						"type": "int"
+					},
+					"TaskID": {
+						"type": "int"
+					},
+					"ConnectorID": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "CIF/SR/FS"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_sftp_getmetadata')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Einstein_Catalyst_Samples_Load_GTL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "DMKE_Lookup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('DMKE_Lookup').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "CPY_FS_ADLS_CB_CT_Numbers",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureDataLakeStoreReadSettings",
+												"recursive": false,
+												"wildcardFileName": "*.csv",
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"preCopyScript": "truncate table  [stg].[Src_DMKE_CT_CatalystSample]",
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"enableSkipIncompatibleRow": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_adls_catalystsamples",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder_path": {
+													"value": "@item().adls_landing_file_path",
+													"type": "Expression"
+												},
+												"file_path": "*.csv"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_asql_src_catalystsamples",
+											"type": "DatasetReference"
+										}
+									]
+								},
+								{
+									"name": "Lookup4",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "CPY_FS_ADLS_CB_CT_Numbers",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": "SELECT STUFF((SELECT distinct ',' +  'CT-'+convert (nvarchar(10),ct_number)\n            FROM [stg].[Src_DMKE_CT_CatalystSample]\n\t\t\t--where catalyst_id like '%ct%'\n            FOR XML PATH('')) ,1,1,''\n\t\t\t) AS ctnumber,NULL as cbnumber"
+										},
+										"dataset": {
+											"referenceName": "ds_asql_dest",
+											"type": "DatasetReference"
+										},
+										"firstRowOnly": true
+									}
+								},
+								{
+									"name": "If Condition2",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Lookup4",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(activity('Lookup4').output.firstRow.ctnumber,null)",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Cpy_DMKE_ADLS_CT_Numbers",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "SqlServerSource",
+														"sqlReaderStoredProcedureName": "[[dbo].[spExtractCatalystPropertiesDMKE_GTL]",
+														"storedProcedureParameters": {
+															"catlystNameList": {
+																"type": "String",
+																"value": {
+																	"value": "@activity('Lookup4').output.firstRow.ctnumber",
+																	"type": "Expression"
+																}
+															},
+															"cbNumberList": {
+																"type": "String",
+																"value": {
+																	"value": "@activity('Lookup4').output.firstRow.cbnumber",
+																	"type": "Expression"
+																}
+															}
+														}
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureDataLakeStoreWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "ds_src_aws_sql_gtl",
+														"type": "DatasetReference"
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "ds_dest_adls_dkme_sample_ct",
+														"type": "DatasetReference",
+														"parameters": {
+															"folder_path": {
+																"value": "@item().dmke_file_path",
+																"type": "Expression"
+															},
+															"file_path": {
+																"value": "Catalystsamples_CT.csv",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "DMKE_Lookup",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[usp_get_filename]",
+								"storedProcedureParameters": {
+									"file_name": {
+										"type": "String",
+										"value": "0094"
+									},
+									"file_process_status": {
+										"type": "String",
+										"value": "Arrived"
+									},
+									"file_shortname": {
+										"type": "String",
+										"value": "ExpInfo"
+									},
+									"file_sub_short_name": {
+										"type": "String",
+										"value": "ExpInfo"
+									},
+									"filesource": {
+										"type": "String",
+										"value": "STCA"
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "ds_asql_dest",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"Revision_Date": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "DEV_GTL_ING"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_asql_dest')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_catalystsamples')]",
+				"[concat(variables('factoryId'), '/datasets/ds_asql_src_catalystsamples')]",
+				"[concat(variables('factoryId'), '/datasets/ds_src_aws_sql_gtl')]",
+				"[concat(variables('factoryId'), '/datasets/ds_dest_adls_dkme_sample_ct')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Einstein_Catalyst_Samples_Load_STCA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "CatalystTubeLookup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('CatalystTubeLookup').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "CPY_FS_ADLS_CB_CT_Numbers",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureDataLakeStoreReadSettings",
+												"recursive": false,
+												"wildcardFileName": "*.csv",
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"preCopyScript": "truncate table [stg].[Src_CatalystSample]",
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"enableSkipIncompatibleRow": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "Experiment_Title",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Experiment_Title",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Aim_Of_Experiment",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Aim_Of_Experiment",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Processor_Version",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Processor_Version",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Test_Number",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Test_Number",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Test_Type",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Test_Type",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Requestor",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Requestor",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Unit_ID",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Unit_ID",
+														"type": "Int32"
+													}
+												},
+												{
+													"source": {
+														"name": "Reactor_Number",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Reactor_Number",
+														"type": "Int32"
+													}
+												},
+												{
+													"source": {
+														"name": "Sample_Loading",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Sample_Loading",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Reactor_Diameter_cm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Reactor_Diameter_cm",
+														"type": "Double"
+													}
+												},
+												{
+													"source": {
+														"name": "Background_Experiment",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Background_Experiment",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "CLA",
+														"type": "String"
+													},
+													"sink": {
+														"name": "CLA",
+														"type": "Int32"
+													}
+												},
+												{
+													"source": {
+														"name": "CLA_1",
+														"type": "String"
+													},
+													"sink": {
+														"name": "CLA_1",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "CLA_2",
+														"type": "String"
+													},
+													"sink": {
+														"name": "CLA_2",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "CLA_3",
+														"type": "String"
+													},
+													"sink": {
+														"name": "CLA_3",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Description",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Description",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Total_Bed_Height_cm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Total_Bed_Height_cm",
+														"type": "Double"
+													}
+												},
+												{
+													"source": {
+														"name": "Bed_Height_1_cm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Bed_Height_1_cm",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Bed_Height_2_cm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Bed_Height_2_cm",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Bed_Height_3_cm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Bed_Height_3_cm",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Diluent_Factor_v_v",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Diluent_Factor_v_v",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "1_Diluent_Factor_v_v",
+														"type": "String"
+													},
+													"sink": {
+														"name": "1_Diluent_Factor_v_v",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "2_Diluent_Factor_v_v",
+														"type": "String"
+													},
+													"sink": {
+														"name": "2_Diluent_Factor_v_v",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "3_Diluent_Factor_v_v",
+														"type": "String"
+													},
+													"sink": {
+														"name": "3_Diluent_Factor_v_v",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Diluent_Type",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Diluent_Type",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "1_Diluent_Type",
+														"type": "String"
+													},
+													"sink": {
+														"name": "1_Diluent_Type",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "2_Diluent_Type",
+														"type": "String"
+													},
+													"sink": {
+														"name": "2_Diluent_Type",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "3_Diluent_Type",
+														"type": "String"
+													},
+													"sink": {
+														"name": "3_Diluent_Type",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Diluent_Size_mm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Diluent_Size_mm",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "1_Diluent_Size_mm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "1_Diluent_Size_mm",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "2_Diluent_Size_mm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "2_Diluent_Size_mm",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "3_Diluent_Size_mm",
+														"type": "String"
+													},
+													"sink": {
+														"name": "3_Diluent_Size_mm",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Volume_Reactor_ml",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Volume_Reactor_ml",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "1_Volume_Reactor_ml",
+														"type": "String"
+													},
+													"sink": {
+														"name": "1_Volume_Reactor_ml",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "2_Volume_Reactor_ml",
+														"type": "String"
+													},
+													"sink": {
+														"name": "2_Volume_Reactor_ml",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "3_Volume_Reactor_ml",
+														"type": "String"
+													},
+													"sink": {
+														"name": "3_Volume_Reactor_ml",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Intake_g",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Intake_g",
+														"type": "Double"
+													}
+												},
+												{
+													"source": {
+														"name": "1_Intake_g",
+														"type": "String"
+													},
+													"sink": {
+														"name": "1_Intake_g",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "2_Intake_g",
+														"type": "String"
+													},
+													"sink": {
+														"name": "2_Intake_g",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "3_Intake_g",
+														"type": "String"
+													},
+													"sink": {
+														"name": "3_Intake_g",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Intake_ml",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Intake_ml",
+														"type": "Double"
+													}
+												},
+												{
+													"source": {
+														"name": "1_Intake_ml",
+														"type": "String"
+													},
+													"sink": {
+														"name": "1_Intake_ml",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "2_Intake_ml",
+														"type": "String"
+													},
+													"sink": {
+														"name": "2_Intake_ml",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "3_Intake_ml",
+														"type": "String"
+													},
+													"sink": {
+														"name": "3_Intake_ml",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Diluent_Intake_g",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Diluent_Intake_g",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "1_Diluent_Intake_g",
+														"type": "String"
+													},
+													"sink": {
+														"name": "1_Diluent_Intake_g",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "2_Diluent_Intake_g",
+														"type": "String"
+													},
+													"sink": {
+														"name": "2_Diluent_Intake_g",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "3_Diluent_Intake_g",
+														"type": "String"
+													},
+													"sink": {
+														"name": "3_Diluent_Intake_g",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Pre_Treatment",
+														"type": "String"
+													},
+													"sink": {
+														"name": "Pre_Treatment",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "CT_Number",
+														"type": "String"
+													},
+													"sink": {
+														"name": "CT_Number",
+														"type": "Int32"
+													}
+												}
+											]
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_adls_catalystsamples",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder_path": {
+													"value": "@item().adls_landing_file_path",
+													"type": "Expression"
+												},
+												"file_path": "*.csv"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_asql_src_catalystsamples",
+											"type": "DatasetReference"
+										}
+									]
+								},
+								{
+									"name": "Lookup4",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "CPY_FS_ADLS_CB_CT_Numbers",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": "SELECT STUFF((SELECT ',' +  'CT-'+convert (nvarchar(10),ct_number)\n            FROM stg.Src_CatalystSample \n\t\t\t--where catalyst_id like '%ct%'\n            FOR XML PATH('')) ,1,1,''\n\t\t\t) AS ctnumber,NULL as cbnumber"
+										},
+										"dataset": {
+											"referenceName": "ds_asql_dest",
+											"type": "DatasetReference"
+										},
+										"firstRowOnly": true
+									}
+								},
+								{
+									"name": "If Condition2",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Lookup4",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(activity('Lookup4').output.firstRow.ctnumber,null)",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Cpy_DMKE_ADLS_CT_Numbers",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "SqlServerSource",
+														"sqlReaderStoredProcedureName": "[[dbo].[spExtractCatalystPropertiesDMKE_GTL]",
+														"storedProcedureParameters": {
+															"catlystNameList": {
+																"type": "String",
+																"value": {
+																	"value": "@activity('Lookup4').output.firstRow.ctnumber",
+																	"type": "Expression"
+																}
+															},
+															"cbNumberList": {
+																"type": "String",
+																"value": {
+																	"value": "@activity('Lookup4').output.firstRow.cbnumber",
+																	"type": "Expression"
+																}
+															}
+														}
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureDataLakeStoreWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "ds_src_aws_sql_gtl",
+														"type": "DatasetReference"
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "ds_dest_adls_dkme_sample_ct",
+														"type": "DatasetReference",
+														"parameters": {
+															"folder_path": {
+																"value": "@item().dmke_file_path",
+																"type": "Expression"
+															},
+															"file_path": {
+																"value": "Catalystsamples_CT.csv",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "SetVariable1",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "Revision_Date",
+							"value": {
+								"value": "@formatDateTime(utcnow(),'yyyy-MM-dd HH:mm:ss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "CatalystTubeLookup",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "SetVariable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[usp_get_filename]",
+								"storedProcedureParameters": {
+									"file_name": {
+										"type": "String",
+										"value": "0094"
+									},
+									"file_process_status": {
+										"type": "String",
+										"value": "Arrived"
+									},
+									"file_shortname": {
+										"type": "String",
+										"value": "Run Request"
+									},
+									"file_sub_short_name": {
+										"type": "String",
+										"value": "Catalyst and Tube"
+									},
+									"filesource": {
+										"type": "String",
+										"value": "STCA"
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "ds_asql_dest",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"variables": {
+					"Revision_Date": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "CIF/SR/DMKE"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_asql_dest')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_catalystsamples')]",
+				"[concat(variables('factoryId'), '/datasets/ds_asql_src_catalystsamples')]",
+				"[concat(variables('factoryId'), '/datasets/ds_src_aws_sql_gtl')]",
+				"[concat(variables('factoryId'), '/datasets/ds_dest_adls_dkme_sample_ct')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Einstein_Get_FS_FilePath')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Einstein_Get_FS_FilePath",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[CIF].[Sp_Einstein_SL_Get_Laision_SourcePath]",
+								"storedProcedureParameters": {
+									"PathID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SourceID",
+											"type": "Expression"
+										}
+									},
+									"ProjectID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.ProjectID",
+											"type": "Expression"
+										}
+									},
+									"SystemID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SystemID",
+											"type": "Expression"
+										}
+									},
+									"ConnectorID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.ConnectorID",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "Ds_GIF_Dmz_FilePathLookup",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "GIF_Iterate_FilePath_List",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Einstein_Get_FS_FilePath",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Einstein_Get_FS_FilePath').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Execute FS_SetMetaDataIntoStage",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "Update Task Log Started",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Einstein_Adf_Set_Metadata_Stage",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"FilePath": {
+												"value": "@item().FilePath",
+												"type": "Expression"
+											},
+											"SystemID": {
+												"value": "@pipeline().parameters.SystemID",
+												"type": "Expression"
+											},
+											"PathID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											},
+											"TaskGroupID": {
+												"value": "@pipeline().parameters.TaskGroupID",
+												"type": "Expression"
+											},
+											"ProjectID": {
+												"value": "@pipeline().parameters.ProjectID",
+												"type": "Expression"
+											},
+											"TaskID": {
+												"value": "@pipeline().parameters.TaskID",
+												"type": "Expression"
+											},
+											"ConnectorID": {
+												"value": "@pipeline().parameters.ConnectorID",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "Update Task Log Started",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[CIF].[Sp_Einstein_Set_Object_Task_Execution_Log]",
+										"storedProcedureParameters": {
+											"Collected": {
+												"value": "1",
+												"type": "Int32"
+											},
+											"ErrorDesc": {
+												"value": {
+													"value": "No Error",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"GroupID": {
+												"value": {
+													"value": "@pipeline().parameters.TaskGroupID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"InRowcount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"IobjectID": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"LogText": {
+												"value": {
+													"value": "Task collection between Source (FS) to Destination (RAW Layer)",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"LogType": {
+												"value": "1",
+												"type": "Int32"
+											},
+											"OutRcount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"RejectedCount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"RunID": {
+												"value": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"Severity": {
+												"value": "3",
+												"type": "Int32"
+											},
+											"Spresent": {
+												"value": "1",
+												"type": "Int32"
+											},
+											"Success": {
+												"value": "1",
+												"type": "Int32"
+											},
+											"TaskID": {
+												"value": {
+													"value": "@pipeline().parameters.TaskID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"TaskName": {
+												"value": {
+													"value": "Einstein_Sl_Adf_Get_FS_File_Metadata",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"SystemID": {
+												"value": {
+													"value": "@pipeline().parameters.SystemID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_GTL",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Update Task Log Ended",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Execute Dmz_Landing",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[CIF].[SpEinstein_Set_Object_Task_Execution_Update]",
+										"storedProcedureParameters": {
+											"GroupID": {
+												"value": {
+													"value": "@pipeline().parameters.TaskGroupID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"LogType": {
+												"value": "2",
+												"type": "Int32"
+											},
+											"RunID": {
+												"value": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"TaskID": {
+												"value": {
+													"value": "@pipeline().parameters.TaskID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"SystemID": {
+												"value": {
+													"value": "@pipeline().parameters.SystemID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_GTL",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Execute Dmz_Landing",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "Execute FS_SetMetaDataIntoStage",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Einstein_Sl_Adf_CopyFile_FS_Landing",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"ZoneID": {
+												"value": "1",
+												"type": "Expression"
+											},
+											"PathID": {
+												"value": "@pipeline().parameters.SourceID",
+												"type": "Expression"
+											},
+											"SystemID": {
+												"value": "@pipeline().parameters.SystemID",
+												"type": "Expression"
+											},
+											"TaskGroupID": {
+												"value": "@pipeline().parameters.TaskGroupID",
+												"type": "Expression"
+											},
+											"FilePath": {
+												"value": "@item().FilePath",
+												"type": "Expression"
+											},
+											"ProjectID": {
+												"value": "@pipeline().parameters.ProjectID",
+												"type": "Expression"
+											},
+											"TaskID": {
+												"value": "@pipeline().parameters.TaskID",
+												"type": "Expression"
+											},
+											"ConnectorID": {
+												"value": "@pipeline().parameters.ConnectorID",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "Update Failure Setmetada",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Execute FS_SetMetaDataIntoStage",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[CIF].[Sp_Einstein_Set_Object_Task_Execution_Log]",
+										"storedProcedureParameters": {
+											"Collected": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"ErrorDesc": {
+												"value": {
+													"value": "@activity('Execute FS_SetMetaDataIntoStage').Error.errorCode",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"GroupID": {
+												"value": {
+													"value": "@pipeline().parameters.TaskGroupID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"InRowcount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"IobjectID": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"LogText": {
+												"value": {
+													"value": "Task Execute _SetFSMetaDataIntoStage face some issue while extracting files metadata information into Stage table",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"LogType": {
+												"value": "3",
+												"type": "Int32"
+											},
+											"OutRcount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"RejectedCount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"RunID": {
+												"value": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"Severity": {
+												"value": "1",
+												"type": "Int32"
+											},
+											"Spresent": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"Success": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"TaskID": {
+												"value": {
+													"value": "@pipeline().parameters.TaskID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"TaskName": {
+												"value": {
+													"value": "Execute FS_SetMetaDataIntoStage",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"SystemID": {
+												"value": {
+													"value": "@pipeline().parameters.SystemID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_GTL",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Update Failure DMZ Landing",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Execute Dmz_Landing",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[CIF].[Sp_Einstein_Set_Object_Task_Execution_Log]",
+										"storedProcedureParameters": {
+											"Collected": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"ErrorDesc": {
+												"value": {
+													"value": "@activity('Execute Dmz_Landing').Error.errorCode",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"GroupID": {
+												"value": {
+													"value": "@pipeline().parameters.TaskGroupID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"InRowcount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"IobjectID": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"LogText": {
+												"value": {
+													"value": "Task Execute FS_Landing have some issue while extracting Files from FILE SYSTEM to Landing layer",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"LogType": {
+												"value": "3",
+												"type": "Int32"
+											},
+											"OutRcount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"RejectedCount": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"RunID": {
+												"value": {
+													"value": "@pipeline().RunId",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"Severity": {
+												"value": "1",
+												"type": "Int32"
+											},
+											"Spresent": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"Success": {
+												"value": "0",
+												"type": "Int32"
+											},
+											"TaskID": {
+												"value": {
+													"value": "@pipeline().parameters.TaskID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"TaskName": {
+												"value": {
+													"value": "Execute Dmz_Landing",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"SystemID": {
+												"value": {
+													"value": "@pipeline().parameters.SystemID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_GTL",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Update TaskLog Status",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "GIF_Iterate_FilePath_List",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[SpEinstein_Set_Object_Task_Execution_Update]",
+							"storedProcedureParameters": {
+								"GroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"LogType": {
+									"value": "2",
+									"type": "Int32"
+								},
+								"RunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"TaskID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"TaskGroupID": {
+						"type": "int"
+					},
+					"SourceID": {
+						"type": "int"
+					},
+					"SystemID": {
+						"type": "int"
+					},
+					"ProjectID": {
+						"type": "int"
+					},
+					"TaskID": {
+						"type": "int"
+					},
+					"ConnectorID": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "CIF/SR/FS"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Ds_GIF_Dmz_FilePathLookup')]",
+				"[concat(variables('factoryId'), '/pipelines/Einstein_Adf_Set_Metadata_Stage')]",
+				"[concat(variables('factoryId'), '/pipelines/Einstein_Sl_Adf_CopyFile_FS_Landing')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Einstein_Get_SampleManager')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Loop through Table",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Tables').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Insert into Temp",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[GIF].[usp_Get_AUAT_Table]",
+										"storedProcedureParameters": {
+											"Table_Name": {
+												"value": {
+													"value": "@item().SourceFileName",
+													"type": "Expression"
+												},
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_GTL",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Execute Pipeline1",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "Insert into Temp",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "SM_CHILD",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"DestinationFileName": {
+												"value": "@item().DestinationFileName",
+												"type": "Expression"
+											},
+											"DestPath": {
+												"value": "@item().DestPath",
+												"type": "Expression"
+											},
+											"LogID": {
+												"value": "@item().LogID",
+												"type": "Expression"
+											},
+											"ObjectID": {
+												"value": "@item().ObjectID",
+												"type": "Expression"
+											},
+											"FileName": {
+												"value": "@item().FileShortName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Tables",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Stored Procedure2",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[GIF].[Sp_Retail_SL_Get_Laision_SourceDestination_Path]",
+								"storedProcedureParameters": {
+									"ConnectorID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.ConnectorID",
+											"type": "Expression"
+										}
+									},
+									"FilePath": {
+										"type": "String",
+										"value": "/SAP HANA/"
+									},
+									"PathID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.PathID",
+											"type": "Expression"
+										}
+									},
+									"ProjectID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.ProjectID",
+											"type": "Expression"
+										}
+									},
+									"SystemID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SystemID",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ds_Oracle_src",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Stored Procedure2",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[GIF].[Sp_Retail_IR_SL_Set_Stage_FileLog]",
+							"storedProcedureParameters": {
+								"ConnectorID": {
+									"value": {
+										"value": "@pipeline().parameters.ConnectorID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"PathID": {
+									"value": {
+										"value": "@pipeline().parameters.PathID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"ProjectID": {
+									"value": {
+										"value": "@pipeline().parameters.ProjectID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"TaskGroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"ConnectorID": {
+						"type": "int"
+					},
+					"ProjectID": {
+						"type": "int"
+					},
+					"TaskGroupID": {
+						"type": "int"
+					},
+					"PathID": {
+						"type": "int"
+					},
+					"SystemID": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "CIF/SR/SM"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_Oracle_src')]",
+				"[concat(variables('factoryId'), '/pipelines/SM_CHILD')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Einstein_Sl_Adf_CopyFile_FS_Landing')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CIF_FS_Landing_Path",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Update Task Log Started",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[CIF].[Sp_Einstein_SL_Get_FS_SourceDestination_Path]",
+								"storedProcedureParameters": {
+									"FilePath": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.FilePath",
+											"type": "Expression"
+										}
+									},
+									"PathID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.PathID",
+											"type": "Expression"
+										}
+									},
+									"ProjectID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.ProjectID",
+											"type": "Expression"
+										}
+									},
+									"SystemID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.SystemID",
+											"type": "Expression"
+										}
+									},
+									"ConnectorID": {
+										"type": "Int32",
+										"value": {
+											"value": "@pipeline().parameters.ConnectorID",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "Ds_GIF_Dmz_FilePathLookup",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "GIF_Iterate_DmzLanding_Path",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "CIF_FS_Landing_Path",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('CIF_FS_Landing_Path').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy_Landing_Dest",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "FileServerReadSettings",
+												"recursive": true
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureDataLakeStoreWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_sftp_src",
+											"type": "DatasetReference",
+											"parameters": {
+												"Folder_Path": {
+													"value": "@pipeline().parameters.FilePath",
+													"type": "Expression"
+												},
+												"File_Path": {
+													"value": "@Item().SourceFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_adls_dest",
+											"type": "DatasetReference",
+											"parameters": {
+												"Folder_Path": {
+													"value": "@concat('/RAW/W00008-EIN-GTL/GTL-STCA-LAB/INITIAL/',Item().DestPath,'/')",
+													"type": "Expression"
+												},
+												"File_Name": {
+													"value": "@Item().DestinationFileName",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Update FileLog IsProcessed",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Copy_Landing_Dest",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[CIF].[Sp_CIF_Set_FileLog_IsProcessed_Update]",
+										"storedProcedureParameters": {
+											"DestFileName": {
+												"value": {
+													"value": "@Item().DestinationFileName",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"LogID": {
+												"value": {
+													"value": "@item().LogID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"ParentObjectID": {
+												"value": {
+													"value": "@item().ParentObjectID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_GTL",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Update_ScheduleTime",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "GIF_Iterate_DmzLanding_Path",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[Sp_CIF_Set_TaskGroup_Schedule_Update]",
+							"storedProcedureParameters": {
+								"TaskGroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Update Task Log Started",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[Sp_Einstein_Set_Object_Task_Execution_Log]",
+							"storedProcedureParameters": {
+								"Collected": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"ErrorDesc": {
+									"value": {
+										"value": "No Error",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"GroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"InRowcount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"IobjectID": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"LogText": {
+									"value": {
+										"value": "Extracting files from  file system to Raw layer",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"LogType": {
+									"value": "1",
+									"type": "Int32"
+								},
+								"OutRcount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"RejectedCount": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"RunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Severity": {
+									"value": "3",
+									"type": "Int32"
+								},
+								"Spresent": {
+									"value": "1",
+									"type": "Int32"
+								},
+								"Success": {
+									"value": "1",
+									"type": "Int32"
+								},
+								"TaskID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"TaskName": {
+									"value": {
+										"value": "Einstein_Sl_Adf_CopyFile_FS_RawLayer",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Update Task Log Ended",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Update_ScheduleTime",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[CIF].[SpEinstein_Set_Object_Task_Execution_Update]",
+							"storedProcedureParameters": {
+								"GroupID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskGroupID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"LogType": {
+									"value": "2",
+									"type": "Int32"
+								},
+								"RunID": {
+									"value": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"TaskID": {
+									"value": {
+										"value": "@pipeline().parameters.TaskID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SystemID": {
+									"value": {
+										"value": "@pipeline().parameters.SystemID",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_ASQL_GTL",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"ZoneID": {
+						"type": "int"
+					},
+					"PathID": {
+						"type": "int"
+					},
+					"SystemID": {
+						"type": "int"
+					},
+					"TaskGroupID": {
+						"type": "int"
+					},
+					"FilePath": {
+						"type": "string"
+					},
+					"ProjectID": {
+						"type": "int"
+					},
+					"TaskID": {
+						"type": "int"
+					},
+					"ConnectorID": {
+						"type": "int"
+					}
+				},
+				"folder": {
+					"name": "CIF/SR/FS"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Ds_GIF_Dmz_FilePathLookup')]",
+				"[concat(variables('factoryId'), '/datasets/ds_sftp_src')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_dest')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Einstein_Sl_Adf_Get_Connector')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This pipeline will collect the schedule connector information from metadata catalog",
+				"activities": [
+					{
+						"name": "Connector_Lookup",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[GIF].[Sp_Retail_SL_Get_Connector]",
+								"storedProcedureParameters": {
+									"Connector": {
+										"type": "String",
+										"value": "SFTP"
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "Ds_GIF_Dmz_FilePathLookup",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Connector Iteration",
+						"description": "Iterate Connector_Lookup activity output.",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Connector_Lookup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Connector_Lookup').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "FS-LabServer",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().Connector,'FS-LabServer')",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Retail_Sl_Adl_Get_File_Metadata",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "Einstein_Adf_Set_Metadata_Stage",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"TaskGroupID": {
+															"value": "@item().TaskGroupID",
+															"type": "Expression"
+														},
+														"SourceID": {
+															"value": "@item().SourcePathID",
+															"type": "Expression"
+														},
+														"SystemID": {
+															"value": "@item().SystemID",
+															"type": "Expression"
+														},
+														"ProjectID": {
+															"value": "@item().ProjectID",
+															"type": "Expression"
+														},
+														"TaskID": {
+															"value": "@item().TaskID",
+															"type": "Expression"
+														},
+														"ConnectorID": {
+															"value": "@item().ConnectorID",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "DMKE",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().Connector,'DMKE')",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Retail_Sl_Adl_Get_File_Metadata_copy1",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "Einstein_Adf_Set_Metadata_Stage",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"TaskGroupID": {
+															"value": "@item().TaskGroupID",
+															"type": "Expression"
+														},
+														"SourceID": {
+															"value": "@item().SourcePathID",
+															"type": "Expression"
+														},
+														"SystemID": {
+															"value": "@item().SystemID",
+															"type": "Expression"
+														},
+														"ProjectID": {
+															"value": "@item().ProjectID",
+															"type": "Expression"
+														},
+														"TaskID": {
+															"value": "@item().TaskID",
+															"type": "Expression"
+														},
+														"ConnectorID": {
+															"value": "@item().ConnectorID",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "SampleManager",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().Connector,'DMKE')",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Retail_Sl_Adl_Get_File_Metadata_copy1_copy1",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "Einstein_Adf_Set_Metadata_Stage",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"TaskGroupID": {
+															"value": "@item().TaskGroupID",
+															"type": "Expression"
+														},
+														"SourceID": {
+															"value": "@item().SourcePathID",
+															"type": "Expression"
+														},
+														"SystemID": {
+															"value": "@item().SystemID",
+															"type": "Expression"
+														},
+														"ProjectID": {
+															"value": "@item().ProjectID",
+															"type": "Expression"
+														},
+														"TaskID": {
+															"value": "@item().TaskID",
+															"type": "Expression"
+														},
+														"ConnectorID": {
+															"value": "@item().ConnectorID",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "PI-Tags",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().Connector,'DMKE')",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Retail_Sl_Adl_Get_File_Metadata_copy1_copy1_copy1",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "Einstein_Adf_Set_Metadata_Stage",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"TaskGroupID": {
+															"value": "@item().TaskGroupID",
+															"type": "Expression"
+														},
+														"SourceID": {
+															"value": "@item().SourcePathID",
+															"type": "Expression"
+														},
+														"SystemID": {
+															"value": "@item().SystemID",
+															"type": "Expression"
+														},
+														"ProjectID": {
+															"value": "@item().ProjectID",
+															"type": "Expression"
+														},
+														"TaskID": {
+															"value": "@item().TaskID",
+															"type": "Expression"
+														},
+														"ConnectorID": {
+															"value": "@item().ConnectorID",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "CIF/SR/Master-Connect"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Ds_GIF_Dmz_FilePathLookup')]",
+				"[concat(variables('factoryId'), '/pipelines/Einstein_Adf_Set_Metadata_Stage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Master_Get_Metadata_GTL_STCA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "hte_getmetadata",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "hte source Lookup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "Ds_Fs_Metadata_STCA_GTL",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderpath": {
+										"value": "@activity('hte source Lookup').output.firstrow.folderpath",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"itemName",
+								"itemType",
+								"lastModified",
+								"childItems"
+							]
+						}
+					},
+					{
+						"name": "hte source Lookup",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[usp_get_datasource]",
+								"storedProcedureParameters": {
+									"file_source": {
+										"type": "String",
+										"value": "STCA"
+									}
+								}
+							},
+							"dataset": {
+								"referenceName": "Ds_Asql_GetSource",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "ExpInfo_MuSyCon",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "hte_getmetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('hte_getmetadata').output.childitems",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "sp_run_request",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[usp_insert_filelog_ExpInfo_MuSyCon]",
+										"storedProcedureParameters": {
+											"file_size": {
+												"value": "0",
+												"type": "Decimal"
+											},
+											"filename": {
+												"value": {
+													"value": "@item().name ",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"filesource": {
+												"value": "STCA",
+												"type": "String"
+											},
+											"last_modified_date": {
+												"value": {
+													"value": "@activity('hte_getmetadata').output.lastModified",
+													"type": "Expression"
+												},
+												"type": "DateTime"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_GTL",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "DEV_GTL_ING"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Ds_Fs_Metadata_STCA_GTL')]",
+				"[concat(variables('factoryId'), '/datasets/Ds_Asql_GetSource')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SM_CHILD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[GIF].[Sp_GIF_Get_Table_Query]",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ds_Oracle_src",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup1').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SapHanaSource",
+											"query": {
+												"value": "@item().Extraction_Query",
+												"type": "Expression"
+											},
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "AzureDataLakeStoreSink"
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_Oracle_src",
+											"type": "DatasetReference"
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_adls_ct",
+											"type": "DatasetReference"
+										}
+									]
+								},
+								{
+									"name": "Update Log",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Copy data1",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[GIF].[Sp_GIF_Set_FileLog_IsProcessed_Update]",
+										"storedProcedureParameters": {
+											"DestFileName": {
+												"value": {
+													"value": "@pipeline().parameters.DestinationFileName",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"LogID": {
+												"value": {
+													"value": "@pipeline().parameters.LogID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											},
+											"ParentObjectID": {
+												"value": {
+													"value": "@pipeline().parameters.ObjectID",
+													"type": "Expression"
+												},
+												"type": "Int32"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_ASQL_GTL",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"parameters": {
+					"DestinationFileName": {
+						"type": "string"
+					},
+					"DestPath": {
+						"type": "string"
+					},
+					"LogID": {
+						"type": "int"
+					},
+					"ObjectID": {
+						"type": "int"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "CIF/SR/SM"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_Oracle_src')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_ct')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ds_Adls_Stca_GTL_Lab')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folder_path": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DEV_GTL"
+				},
+				"annotations": [],
+				"type": "AzureDataLakeStoreFile",
+				"typeProperties": {
+					"fileName": "",
+					"folderPath": {
+						"value": "@dataset().folder_path",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ds_Asql_GetSource')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DEV_GTL"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ds_Fs_Metadata_STCA_GTL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_STCA",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderpath": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DEV_GTL"
+				},
+				"annotations": [],
+				"type": "FileShare",
+				"typeProperties": {
+					"fileName": "",
+					"folderPath": {
+						"value": "@dataset().folderpath",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FS_STCA')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ds_Fs_STCA_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LNK_FS_LAB_STCA",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folder_path": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DEV_GTL"
+				},
+				"annotations": [],
+				"type": "FileShare",
+				"typeProperties": {
+					"fileName": "",
+					"folderPath": {
+						"value": "@dataset().folder_path",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LNK_FS_LAB_STCA')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ds_GIF_Dmz_FilePathLookup')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_Oracle_src')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ORC_SM_EUROPE",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_adls_catalystsamples')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folder_path": {
+						"type": "string"
+					},
+					"file_path": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"fileName": {
+							"value": "@dataset().file_path",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().folder_path",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_adls_ct')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_adls_dest')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Folder_Path": {
+						"type": "string"
+					},
+					"File_Name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"fileName": "2019-07-07-M1.csv",
+						"folderPath": "RAW/W00008-EIN-GTL/GTL-STCA-LAB/INITIAL/0094/Catalyst and Tube"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_asql_dest')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_asql_src_catalystsamples')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "stg",
+					"table": "Src_DMKE_CT_CatalystSample"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_dest_adls_dkme_sample_ct')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folder_path": {
+						"type": "string"
+					},
+					"file_path": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"fileName": {
+							"value": "@dataset().file_path",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().folder_path",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_sftp_getmetadata')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LNK_FS_LAB_STCA",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderpath": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "SftpLocation",
+						"folderPath": {
+							"value": "@dataset().folderpath",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LNK_FS_LAB_STCA')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_sftp_src')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LNK_FS_LAB_STCA",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Folder_Path": {
+						"type": "string"
+					},
+					"File_Path": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "SftpLocation",
+						"fileName": {
+							"value": "@dataset().File_Path",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Folder_Path",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LNK_FS_LAB_STCA')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_src_aws_sql_gtl')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AWS_DMKE_SQLDB",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dsc_asql_gtl')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Filename",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Unit",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Aim of experiment",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Test nr. ",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Pre-treatment",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Test Conditions",
+						"type": "nvarchar"
+					},
+					{
+						"name": "R#",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CLA/CT#",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Description",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Shape",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CF",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Intake (g)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Catalyst Bed Height (cm)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Inert Bottom (cm)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Inert Top (cm)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Total Bed Height (cm)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Inert Material",
+						"type": "nvarchar"
+					},
+					{
+						"name": "CBD (g/ml)",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Intake (ml)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Tube ø (mm)",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "GHSV reduction",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Type",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Date&Time",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "HYDROGEN",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "NITROGEN",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CARBONMONOXIDE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CARBONDIOXIDE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "METHANETCD",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "METHANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ETHANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ETHENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PROPANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PROPENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-BUTANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "1-BUTENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-PENTANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "1-PENTENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-HEXANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-HEXENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "HELIUM",
+						"type": "nvarchar"
+					},
+					{
+						"name": "N-HEPTANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-HEPTENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-OCTANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-OCTENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-NONANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-NONENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-DECANE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "N-DECENE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "TOTAL",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Flow Reactor (ml/min)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Flow Reactor (OP)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Pressure Reactor (Barg)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Temp Reactor (°C)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Temp Oven (°C)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Room Pressure",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "HYDROGEN Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "NITROGEN Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CARBONMONOXIDE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CARBONDIOXIDE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "METHANETCD Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "METHANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-BUTANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-BUTENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-PENTANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-PENTENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECANE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECENE Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "TOTAL Corr room pressure (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "HYDROGEN Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "NITROGEN Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CARBONMONOXIDE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CARBONDIOXIDE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "METHANETCD Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "METHANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-BUTANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-BUTENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-PENTANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-PENTENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECANE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECENE Corr SOM GC (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Runhour",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CO Conversion",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "H2 Conversion",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "GHSV",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "GHSV Syngas",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CO converted (mlCO/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N2 Corr Factor",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "HYDROGEN N2 Corr factor (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CARBONMONOXIDE N2 Corr factor (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CARBONDIOXIDE N2 Corr factor (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Shift N2 Corr factor (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CO,in (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "H2, in (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N2, in (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CO,out (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "H2, out (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N2, out (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "CO2, out (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C1-C4 (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "H2O (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "total gas in (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "total gas out (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "total gas out excl H2O (Nl/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "contractie (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "steam pressure (bara) Reactor",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "steam pressure (bara) Oven",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "water partial pressure (bara)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "water RH (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Partial Pressure H2, in",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Partial Pressure H2, out",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Partial Pressure CO, in",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Partial Pressure CO, out",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Contraction Saturator",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PercH2AVG",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PercCOAVG",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "AF V3.1",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "AF V3.2",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "STY (CO) g CH2/l/hr",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "WTY (CO) gCH2/kg/hr",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "METHANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-BUTANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-BUTENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-PENTANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-PENTENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECANE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECENE Contr corrected (v/v%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "METHANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-BUTANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-BUTENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-PENTANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-PENTENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECANE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECENE yield (g/l/hr)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "METHANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "ETHENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "PROPENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-BUTANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-BUTENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-PENTANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "1-PENTENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEXENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-HEPTENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-OCTENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-NONENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECANE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "N-DECENE Selectivity (m/m %)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C5+ selectivity (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "FID/TCD",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C5+ corr",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C2 OLEFINICITIES (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C3 OLEFINICITIES (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C4 OLEFINICITIES (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C5 OLEFINICITIES (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C6 OLEFINICITIES (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C7 OLEFINICITIES (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C8 OLEFINICITIES (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C9 OLEFINICITIES (%)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C10 OLEFINICITIES (%)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "H-#",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "OR",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C1 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C2 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C3 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C4 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C5 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C6 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C7 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C8 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C9 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C10 Selectivity FID/TCD corr (%)",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "C2 Olefinicity (%C=)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C3 Olefinicity (%C=)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C4 Olefinicity (%C=)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C5 Olefinicity (%C=)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C6 Olefinicity (%C=)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C7 Olefinicity (%C=)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C8 Olefinicity (%C=)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope CO conv",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C5+ fitted OR",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope OR",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Alpha C3-C6 CO conv",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Alpha C3-C8 CO conv",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Alpha C3-C7 CO conv",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Alpha C3-C6 OR",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Alpha C3-C8 OR",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C3-C6 Fitted Non Schulz Flory CH4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C3-C8 Fitted Non Schulz Flory CH4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C3-C6 Fitted Missing Schulz Flory C2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C3-C8 Fitted Missing Schulz Flory C2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C5+ Intercept CO conv",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C5+ Intercept OR",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Start Time Fit",
+						"type": "nvarchar"
+					},
+					{
+						"name": "End Time Fit",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Start Fit Runhour",
+						"type": "nvarchar"
+					},
+					{
+						"name": "End Fit Runhour",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Feedratio (H2/CO)",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-parDistFit - C10",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "C-oleDistFit - C10",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SF-DistFit - C1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SF-DistFit - C2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SF-DistFit - C3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SF-DistFit - C4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SF-DistFit - C5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SF-DistFit - C6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SF-DistFit - C7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SF-DistFit - C8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Slope-FittedC# - C10",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C3",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C4",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C5",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C6",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C7",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C8",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C9",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Interc-FittedC# - C10",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "stg",
+					"table": "STCA_0094_ExpInfo"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dsc_src_stca_fs')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_GTL",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF_GTL"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureDataLakeStoreLocation",
+						"fileName": "2019-07-07-M1.csv",
+						"folderPath": "RAW/W00008-EIN-GTL/GTL-STCA-LAB/INITIAL/0094/ExpInfo"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Default Key Vault Service')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "https://shell-02-eun-kv-keqraube.vault.azure.net/"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LNK_FS_LAB_STCA')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "\\\\dmke-amslab.shell.com\\EinsteinGTL_Test\\",
+					"userId": "EUROPE\\App-EinsteinGL-Dev-S",
+					"password": {
+						"type": "SecureString",
+						"value": "**********"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SHIRAmsterdam",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_GTL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDataLakeStore",
+				"typeProperties": {
+					"dataLakeStoreUri": "https://shell01eunadls1lsxooibpa.azuredatalakestore.net/webhdfs/v1",
+					"tenant": "db1e96a8-a3da-442a-930b-235cac24cd5c",
+					"subscriptionId": "c977c615-a62f-4ad4-8782-247e7f1d3f77",
+					"resourceGroupName": "shell-01-rg-toviqawlscqlajjltddr"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_DBS_GTL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://northeurope.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "**********"
+					},
+					"existingClusterId": "0228-071631-tsars665"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FS_STCA')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "\\\\dmke-amslab.shell.com\\",
+					"userId": "EUROPE\\App-EinsteinGL-Dev-S",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "einsteinappkeyvault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "App-EinsteinGL-Dev-S",
+						"secretVersion": "404fa305e5ab4e2ca712b122b26e85e5"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SHIRAmsterdam",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/einsteinappkeyvault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/StorageLinkedService')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"serviceEndpoint": "https://shell02eunstgxufxrzxtzss.blob.core.windows.net/"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/einsteinappkeyvault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "https://shell-02-eun-kv-keqraube.vault.azure.net/"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
