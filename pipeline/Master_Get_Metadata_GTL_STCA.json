@@ -135,6 +135,46 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Child_Data_FS_ADLS_GTL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExpInfo_MuSyCon",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Child_Data_FS_ADLS_GTL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Einstein_Catalyst_Samples_Load_GTL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Child_Data_FS_ADLS_GTL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Einstein_Catalyst_Samples_Load_GTL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"folder": {
