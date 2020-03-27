@@ -3999,7 +3999,7 @@
 					}
 				},
 				"folder": {
-					"name": "DEV_GTL"
+					"name": "DEV_GTL_ING"
 				},
 				"annotations": [],
 				"type": "AzureDataLakeStoreFile",
@@ -4025,7 +4025,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"folder": {
-					"name": "DEV_GTL"
+					"name": "DEV_GTL_ING"
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
@@ -4051,7 +4051,7 @@
 					}
 				},
 				"folder": {
-					"name": "DEV_GTL"
+					"name": "DEV_GTL_ING"
 				},
 				"annotations": [],
 				"type": "FileShare",
@@ -4082,7 +4082,7 @@
 					}
 				},
 				"folder": {
-					"name": "DEV_GTL"
+					"name": "DEV_GTL_ING"
 				},
 				"annotations": [],
 				"type": "FileShare",
@@ -4166,7 +4166,7 @@
 					"location": {
 						"type": "AzureDataLakeStoreLocation",
 						"fileName": {
-							"value": "@dataset().file_patch",
+							"value": "@dataset().file_path",
 							"type": "Expression"
 						},
 						"folderPath": {

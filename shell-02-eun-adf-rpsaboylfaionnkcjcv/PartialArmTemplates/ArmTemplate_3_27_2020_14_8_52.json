@@ -6,185 +6,12 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "shell-02-eun-adf-rpsaboylfaionnkcjcv"
-		},
-		"LS_ASQL_GTL_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_ASQL_GTL'"
-		},
-		"LS_DBS_GTL_accessToken": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accessToken' of 'LS_DBS_GTL'"
-		},
-		"LNK_FS_LAB_STCA_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LNK_FS_LAB_STCA'"
-		},
-		"LS_AWS_DMKE_SQLDB_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_AWS_DMKE_SQLDB'"
-		},
-		"LS_AWS_DMKE_SQLDB_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_AWS_DMKE_SQLDB'"
-		},
-		"Default Key Vault Service_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://shell-02-eun-kv-keqraube.vault.azure.net/"
-		},
-		"LS_ADLS_GTL_properties_typeProperties_dataLakeStoreUri": {
-			"type": "string",
-			"defaultValue": "https://shell01eunadls1lsxooibpa.azuredatalakestore.net/webhdfs/v1"
-		},
-		"LS_ADLS_GTL_properties_typeProperties_tenant": {
-			"type": "string",
-			"defaultValue": "db1e96a8-a3da-442a-930b-235cac24cd5c"
-		},
-		"LS_ADLS_GTL_properties_typeProperties_subscriptionId": {
-			"type": "string",
-			"defaultValue": "c977c615-a62f-4ad4-8782-247e7f1d3f77"
-		},
-		"LS_ADLS_GTL_properties_typeProperties_resourceGroupName": {
-			"type": "string",
-			"defaultValue": "shell-01-rg-toviqawlscqlajjltddr"
-		},
-		"StorageLinkedService_properties_typeProperties_serviceEndpoint": {
-			"type": "string",
-			"defaultValue": "https://shell02eunstgxufxrzxtzss.blob.core.windows.net/"
-		},
-		"einsteinappkeyvault_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://shell-02-eun-kv-keqraube.vault.azure.net/"
-		},
-		"SHIRAmsterdam_properties_typeProperties_linkedInfo_resourceId": {
-			"type": "string",
-			"defaultValue": "/subscriptions/f039aafc-bdda-4248-a57a-1c6efe2f0fd0/resourcegroups/shell-06-rg-mnxlovtkreerwcqaqclx/providers/Microsoft.DataFactory/factories/shell-06-eu-n-adf-nnjksdnadds/integrationruntimes/SHIRAmsterdam"
-		},
-		"Ds_Adls_Stca_GTL_Lab_properties_typeProperties_fileName": {
-			"type": "string",
-			"defaultValue": ""
-		},
-		"Ds_Adls_Stca_GTL_Lab_properties_typeProperties_folderPath": {
-			"type": "string",
-			"defaultValue": "@dataset().folder_path"
-		},
-		"LNK_FS_LAB_STCA_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "\\\\dmke-amslab.shell.com\\EinsteinGTL_Test\\"
-		},
-		"LNK_FS_LAB_STCA_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "EUROPE\\App-EinsteinGL-Dev-S"
-		},
-		"LS_AWS_DMKE_SQLDB_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "Extranet-EU\\APP-Einstein-DEV-S"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/Default Key Vault Service')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('Default Key Vault Service_properties_typeProperties_baseUrl')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ADLS_GTL')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureDataLakeStore",
-				"typeProperties": {
-					"dataLakeStoreUri": "[parameters('LS_ADLS_GTL_properties_typeProperties_dataLakeStoreUri')]",
-					"tenant": "[parameters('LS_ADLS_GTL_properties_typeProperties_tenant')]",
-					"subscriptionId": "[parameters('LS_ADLS_GTL_properties_typeProperties_subscriptionId')]",
-					"resourceGroupName": "[parameters('LS_ADLS_GTL_properties_typeProperties_resourceGroupName')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ASQL_GTL')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_ASQL_GTL_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_DBS_GTL')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureDatabricks",
-				"typeProperties": {
-					"domain": "https://northeurope.azuredatabricks.net",
-					"accessToken": {
-						"type": "SecureString",
-						"value": "[parameters('LS_DBS_GTL_accessToken')]"
-					},
-					"existingClusterId": "0228-071631-tsars665"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/StorageLinkedService')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"serviceEndpoint": "[parameters('StorageLinkedService_properties_typeProperties_serviceEndpoint')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/einsteinappkeyvault')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('einsteinappkeyvault_properties_typeProperties_baseUrl')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SHIRAmsterdam')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"typeProperties": {
-					"linkedInfo": {
-						"resourceId": "[parameters('SHIRAmsterdam_properties_typeProperties_linkedInfo_resourceId')]",
-						"authorizationType": "Rbac"
-					}
-				}
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Ds_Adls_Stca_GTL_Lab')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
@@ -205,16 +32,14 @@
 				"annotations": [],
 				"type": "AzureDataLakeStoreFile",
 				"typeProperties": {
-					"fileName": "[parameters('Ds_Adls_Stca_GTL_Lab_properties_typeProperties_fileName')]",
+					"fileName": "",
 					"folderPath": {
-						"value": "[parameters('Ds_Adls_Stca_GTL_Lab_properties_typeProperties_folderPath')]",
+						"value": "@dataset().folder_path",
 						"type": "Expression"
 					}
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Ds_Asql_GetSource')]",
@@ -230,12 +55,67 @@
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
+				"schema": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_GTL')]"
-			]
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ds_Fs_Metadata_STCA_GTL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FS_STCA",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderpath": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DEV_GTL_ING"
+				},
+				"annotations": [],
+				"type": "FileShare",
+				"typeProperties": {
+					"fileName": "",
+					"folderPath": {
+						"value": "@dataset().folderpath",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ds_Fs_STCA_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LNK_FS_LAB_STCA",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folder_path": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "DEV_GTL_ING"
+				},
+				"annotations": [],
+				"type": "FileShare",
+				"typeProperties": {
+					"fileName": "",
+					"folderPath": {
+						"value": "@dataset().folder_path",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Ds_GIF_Dmz_FilePathLookup')]",
@@ -251,12 +131,27 @@
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
+				"schema": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_GTL')]"
-			]
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_Oracle_src')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ORC_SM_EUROPE",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF"
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": []
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ds_adls_catalystsamples')]",
@@ -299,9 +194,7 @@
 				},
 				"schema": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ds_adls_ct')]",
@@ -327,9 +220,7 @@
 				},
 				"schema": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ds_adls_dest')]",
@@ -361,9 +252,7 @@
 					}
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ds_asql_dest')]",
@@ -379,12 +268,9 @@
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
+				"schema": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_GTL')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ds_asql_src_catalystsamples')]",
@@ -406,9 +292,7 @@
 					"table": "Src_DMKE_CT_CatalystSample"
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_GTL')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ds_dest_adls_dkme_sample_ct')]",
@@ -451,9 +335,94 @@
 				},
 				"schema": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
-			]
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_sftp_getmetadata')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LNK_FS_LAB_STCA",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderpath": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "CIF"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "SftpLocation",
+						"folderPath": {
+							"value": "@dataset().folderpath",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_sftp_src')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LNK_FS_LAB_STCA",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Folder_Path": {
+						"type": "string"
+					},
+					"File_Path": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "CIF"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "SftpLocation",
+						"fileName": {
+							"value": "@dataset().File_Path",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Folder_Path",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_src_aws_sql_gtl')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AWS_DMKE_SQLDB",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "CIF"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": []
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dsc_asql_gtl')]",
@@ -1872,9 +1841,7 @@
 					"table": "STCA_0094_ExpInfo"
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_GTL')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dsc_src_stca_fs')]",
@@ -2795,57 +2762,7 @@
 					}
 				]
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_GTL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LNK_FS_LAB_STCA')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LNK_FS_LAB_STCA_properties_typeProperties_host')]",
-					"userId": "[parameters('LNK_FS_LAB_STCA_properties_typeProperties_userId')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LNK_FS_LAB_STCA_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SHIRAmsterdam",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIRAmsterdam')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_AWS_DMKE_SQLDB')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('LS_AWS_DMKE_SQLDB_connectionString')]",
-					"userName": "[parameters('LS_AWS_DMKE_SQLDB_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_AWS_DMKE_SQLDB_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "SHIRAmsterdam",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/SHIRAmsterdam')]"
-			]
+			"dependsOn": []
 		}
 	]
 }

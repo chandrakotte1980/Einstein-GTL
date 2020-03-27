@@ -99,7 +99,7 @@
 					}
 				},
 				"folder": {
-					"name": "DEV_GTL"
+					"name": "DEV_GTL_ING"
 				},
 				"annotations": [],
 				"type": "FileShare",
@@ -130,7 +130,7 @@
 					}
 				},
 				"folder": {
-					"name": "DEV_GTL"
+					"name": "DEV_GTL_ING"
 				},
 				"annotations": [],
 				"type": "FileShare",
