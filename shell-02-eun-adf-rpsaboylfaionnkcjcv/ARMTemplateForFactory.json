@@ -3798,6 +3798,48 @@
 								}
 							]
 						}
+					},
+					{
+						"name": "Child_Data_FS_ADLS_GTL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExpInfo_MuSyCon",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Child_Data_FS_ADLS_GTL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Einstein_Catalyst_Samples_Load_GTL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Child_Data_FS_ADLS_GTL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Einstein_Catalyst_Samples_Load_GTL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
 					}
 				],
 				"folder": {
@@ -3808,6 +3850,8 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Ds_Fs_Metadata_STCA_GTL')]",
 				"[concat(variables('factoryId'), '/datasets/Ds_Asql_GetSource')]",
+				"[concat(variables('factoryId'), '/pipelines/Child_Data_FS_ADLS_GTL')]",
+				"[concat(variables('factoryId'), '/pipelines/Einstein_Catalyst_Samples_Load_GTL')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_GTL')]"
 			]
 		},
