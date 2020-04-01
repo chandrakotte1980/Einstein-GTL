@@ -22,7 +22,7 @@
 			"location": {
 				"type": "AzureDataLakeStoreLocation",
 				"fileName": {
-					"value": "@dataset().file_patch",
+					"value": "@dataset().file_path",
 					"type": "Expression"
 				},
 				"folderPath": {
